@@ -14,24 +14,20 @@ public class CPU {
         try {
             Runtime rt = Runtime.getRuntime();
             Process proc = rt.exec("java Memory");
-            InputStream is;
-            OutputStream os;
+            InputStream is = proc.getInputStream();
+            OutputStream os = proc.getOutputStream();
+            Scanner sc = new Scanner(is);
 
-            while (PC <= 8) {
-                is = proc.getInputStream();
-                os = proc.getOutputStream();
-
+            while (PC <= 9) {
+                
                 PrintWriter pw = new PrintWriter(os);
                 System.out.println("PC: " + PC);
                 pw.println(PC);
                 pw.flush();
 
-                Scanner sc = new Scanner(is);
-                System.out.println("Has next: " + sc.hasNext());
-                //int value = sc.nextInt();
-                //execInstruction(value, proc);
-                //System.out.println("Value at address: " + "inf");
-                PC++;
+                int value = sc.nextInt();
+                System.out.println("Value and PC: " + value + " and " + PC);
+                execInstruction(value, proc);
             }
             
             //int exitVal = proc.exitValue();
@@ -45,18 +41,13 @@ public class CPU {
     static void execInstruction(int value, Process proc) {
         switch(value) {
             case 50:
-                try {
-                    proc.waitFor();
-                    int exit = proc.exitValue();
-                    System.out.println("Process exited: " + exit);
-                    System.exit(0);
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            // need to implement proc.waitFor to first close the other program
+                System.out.println("Value: " + value);
+                System.out.println("Exiting!");
+                System.exit(0);
 
             default:
-                System.out.println(0);
+                System.out.println("Value: " + value);
                 PC++;
         }
 
