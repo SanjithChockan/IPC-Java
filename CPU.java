@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 public class CPU {
 
+    static int timer = 0;
     static int PC = -1;
     static int SP = 1000;
     static int IR = 0;
@@ -16,7 +17,7 @@ public class CPU {
             Runtime rt = Runtime.getRuntime();
             Process proc = rt.exec("java Memory");
             
-            while (PC < 10) {
+            while (true) {
                 incrementPC();
                 
                 IR = fetch(proc, 'r');
@@ -273,6 +274,16 @@ public class CPU {
             // Pop from stack into AC
             case 28:
                 AC = pop(proc);
+                break;
+            
+            // Perform system call
+            case 29:
+                push(proc, PC);
+                PC = 1499;
+                break;
+
+            case 30:
+                PC = pop(proc);
                 break;
                 
             case 50:
