@@ -6,7 +6,7 @@ public class Memory {
 
     static int [] memory = new int [2000];
     public static void main(String [] args) throws FileNotFoundException {
-        String fileName = "sample1.txt";
+        String fileName = args[0];
         readFromFile(fileName);
 
         while (true) {
@@ -45,6 +45,9 @@ public class Memory {
             else if (line.charAt(0) == '.') {
                 line = line.substring(1);
                 index = Integer.parseInt(line.split(" ")[0]);
+                continue;
+            }
+            else if (!Character.isDigit(line.charAt(0))) {
                 continue;
             }
             else {

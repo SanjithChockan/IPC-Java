@@ -6,28 +6,60 @@ import java.util.Scanner;
 
 public class CPU {
 
-    static int timer = 0;
+    static boolean isSysCallInt = false;
+
     static int PC = -1;
     static int SP = 1000;
     static int IR = 0;
     static int AC = 0;
     static int X, Y = 0;
+    static int timer;
+    static int counter = 0;
+
+    static boolean kernelMode = false;
     public static void main(String [] args) {
+        timer = Integer.parseInt(args[1]);
+
         try {
             Runtime rt = Runtime.getRuntime();
-            Process proc = rt.exec("java Memory");
+            Process proc = rt.exec("java Memory " + args[0]);
             
             while (true) {
                 incrementPC();
+                incrementCounter();
+
+                //System.out.println("PC: " + PC);
+                
+                if (!isSysCallInt && counter == timer) {
+                    kernelMode = true;
+                    int tempSP = SP;
+                    SP = 2000;
+                    push(proc, PC);
+                    push(proc, tempSP);
+                    PC = 1000;
+                    IR = fetch(proc, 'r');
+                    execInstruction(IR, proc);
+                    SP = tempSP;
+                    counter = 0;
+                    resetKernelMode();
+                }
                 
                 IR = fetch(proc, 'r');
                 execInstruction(IR, proc);
+                
             }
             
-
         } catch (Throwable t) {
             t.printStackTrace();
         }
+    }
+
+    static void resetKernelMode() {
+        kernelMode = false;
+    }
+
+    static void incrementCounter() {
+        counter++;
     }
 
     static void incrementPC() {
@@ -50,6 +82,7 @@ public class CPU {
         int tempPC = PC;
         int tempAC = AC;
 
+        AC = data;
         PC = SP;
 
         int writeData = fetch(proc, 'w');
@@ -76,6 +109,7 @@ public class CPU {
         int tempPC;
         int tempAC;
         int writeData;
+        int tempSP;
 
         switch(instruction) {
             // load value into AC
@@ -278,12 +312,19 @@ public class CPU {
             
             // Perform system call
             case 29:
+                isSysCallInt = true;
+                kernelMode = true;
+                tempSP = SP;
+                SP = 2000;
                 push(proc, PC);
+                push(proc, tempSP);
                 PC = 1499;
                 break;
 
             case 30:
+                tempSP = pop(proc);
                 PC = pop(proc);
+                SP = tempSP;
                 break;
                 
             case 50:
